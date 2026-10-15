@@ -4,6 +4,9 @@ Changelog
 Next release
 --------------
 
+- Detect compact author fields with dotted names such as ``Author:Frankie.Chu``.
+  https://github.com/aboutcode-org/scancode-toolkit/issues/4229
+
 - Fix the optional ``licenses`` extra dependency typo to install
   ``licensedcode-data``.
   https://github.com/aboutcode-org/scancode-toolkit/pull/5056

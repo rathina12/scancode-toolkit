@@ -285,6 +285,16 @@ class CopyrightDetector(object):
         # first, POS tag each token using token regexes
         lexed_text = list(self.lexer.lex_tokens(tokens, trace=TRACE_TOK))
 
+        # Dotted names are ambiguous outside an explicit author field.
+        for previous, token in zip(lexed_text, lexed_text[1:]):
+            if (
+                previous.value.lower() in ('author', 'authors')
+                and previous.label in ('AUTH', 'AUTHS')
+                and previous.start_line == token.start_line
+                and re.fullmatch(r'[A-Z][a-z]+(?:\.[A-Z][a-z]+)+', token.value)
+            ):
+                token.label = 'NAME'
+
         if TRACE or TRACE_DEEP:
             logger_debug(f'CopyrightDetector: lexed tokens:')
             for l in lexed_text:
@@ -431,6 +441,7 @@ def get_tokens(numbered_lines, splitter=re.compile(r'[\t =;]+').split):
         # space before in some cases: exclude (digit , (s , (c , (-
         # this allows to recover from words like KISA(Korean
         line = re.sub(pattern=r'(\([^rsc\-\d])', repl=r' \g<1>', string=line)
+        line = re.sub(r'\b(Authors?):(?=\S)', r'\1: ', line, flags=re.IGNORECASE)
         for tok in splitter(line):
             # strip trailing quotes+comma
             if tok.endswith("',"):
